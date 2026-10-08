@@ -1,0 +1,112 @@
+<div class="detail-container" *ngIf="!isLoading() && !error(); else loadingOrError">
+  <div class="detail-header">
+    <a routerLink="/transactions" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      Volver a transacciones
+    </a>
+    <h1 class="page-title">Detalles de Transacción</h1>
+  </div>
+
+  <mat-card class="transaction-detail-card" *ngIf="transaction() as tx" appHighlight [highlighted]="isHighlighted()">
+    <mat-card-header>
+      <div mat-card-avatar class="merchant-avatar" [class]="tx.type">
+        <mat-icon>{{ getCategoryIcon(tx.category) }}</mat-icon>
+      </div>
+      <mat-card-title>{{ tx.merchantName || tx.description }}</mat-card-title>
+      <mat-card-subtitle>{{ tx.category | titlecase }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="amount-section">
+        <span class="amount" [class]="amountClass()">
+          {{ formattedAmount() }}
+        </span>
+        <mat-chip [class]="statusClass() + '-chip'">
+          {{ tx.status | titlecase }}
+        </mat-chip>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="label">ID de Transacción</span>
+          <span class="value mono">{{ tx.id }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="label">Fecha de creación</span>
+          <span class="value">{{ formatDate(tx.createdAt) }}</span>
+        </div>
+
+        <div class="detail-item" *ngIf="tx.updatedAt">
+          <span class="label">Última actualización</span>
+          <span class="value">{{ formatDate(tx.updatedAt) }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="label">Tipo de transacción</span>
+          <span class="value">{{ tx.type | titlecase }}</span>
+        </div>
+
+        <div class="detail-item" *ngIf="tx.accountId">
+          <span class="label">Cuenta</span>
+          <span class="value mono">{{ tx.accountId }}</span>
+        </div>
+
+        <div class="detail-item" *ngIf="tx.reference">
+          <span class="label">Referencia</span>
+          <span class="value mono">{{ tx.reference }}</span>
+        </div>
+
+        <div class="detail-item" *ngIf="tx.notes">
+          <span class="label">Notas</span>
+          <span class="value">{{ tx.notes }}</span>
+        </div>
+
+        <div class="detail-item full-width" *ngIf="tx.metadata">
+          <span class="label">Metadatos adicionales</span>
+          <div class="metadata-container">
+            <div class="metadata-item" *ngFor="let item of tx.metadata | keyvalue">
+              <span class="meta-key">{{ item.key }}:</span>
+              <span class="meta-value">{{ item.value }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-button color="primary" (click)="toggleHighlight()">
+        <mat-icon>{{ isHighlighted() ? 'star' : 'star_border' }}</mat-icon>
+        {{ isHighlighted() ? 'Quitar destacado' : 'Destacar' }}
+      </button>
+      <button mat-button>
+        <mat-icon>share</mat-icon>
+        Compartir
+      </button>
+      <button mat-button color="warn" *ngIf="tx.status === 'PENDING'">
+        <mat-icon>cancel</mat-icon>
+        Cancelar
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<ng-template #loadingOrError>
+  <div class="state-container">
+    <mat-spinner *ngIf="isLoading()" diameter="48"></mat-spinner>
+    
+    <div class="error-state" *ngIf="error() as err">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <p class="error-message">{{ err }}</p>
+      <button mat-raised-button color="primary" (click)="retry()">
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+      <a mat-button routerLink="/transactions">
+        Volver al listado
+      </a>
+    </div>
+  </div>
+</ng-template>

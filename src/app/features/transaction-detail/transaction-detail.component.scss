@@ -1,0 +1,321 @@
+.transaction-detail-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: var(--surface-color, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.transaction-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary, #212121);
+    margin: 0;
+  }
+
+  .back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: var(--primary-color, #1976d2);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--primary-hover, #1565c0);
+    }
+
+    &:active {
+      background-color: var(--primary-active, #0d47a1);
+    }
+  }
+}
+
+.transaction-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.detail-section {
+  background-color: var(--section-bg, #f5f5f5);
+  border-radius: 6px;
+  padding: 20px;
+
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary, #212121);
+    margin: 0 0 16px 0;
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary, #757575);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .value {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-primary, #212121);
+  }
+
+  &.amount .value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--success-color, #2e7d32);
+  }
+
+  &.amount.negative .value {
+    color: var(--error-color, #c62828);
+  }
+
+  &.status {
+    .value {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    &.completed .value {
+      background-color: rgba(46, 125, 50, 0.1);
+      color: var(--success-color, #2e7d32);
+    }
+
+    &.pending .value {
+      background-color: rgba(255, 152, 0, 0.1);
+      color: var(--warning-color, #f57c00);
+    }
+
+    &.failed .value {
+      background-color: rgba(198, 40, 40, 0.1);
+      color: var(--error-color, #c62828);
+    }
+  }
+}
+
+.transaction-description {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: var(--surface-color, #ffffff);
+  border-radius: 4px;
+  border-left: 4px solid var(--primary-color, #1976d2);
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary, #212121);
+  }
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+
+  .message {
+    font-size: 16px;
+    color: var(--text-secondary, #757575);
+    margin-top: 16px;
+  }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color, #e0e0e0);
+  border-top-color: var(--primary-color, #1976d2);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 600px) {
+  .transaction-detail-container {
+    padding: 16px;
+    border-radius: 0;
+  }
+
+  .transaction-detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    h1 {
+      font-size: 20px;
+    }
+
+    .back-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-item.amount .value {
+    font-size: 20px;
+  }
+}
+"// === ARCHIVO: src/app/shared/directives/highlight.directive.ts ===
+import { Directive, ElementRef, Input, OnInit, OnDestroy } from '@angular/core';
+
+@Directive({
+  selector: '[appHighlight]',
+  standalone: true
+})
+export class HighlightDirective implements OnInit, OnDestroy {
+  @Input() appHighlight: string = 'yellow';
+  @Input() highlightDuration: number = 0;
+  @Input() highlightEnabled: boolean = true;
+
+  private originalBackground: string = '';
+  private intervalId: any;
+
+  constructor(private el: ElementRef) {}
+
+  ngOnInit() {
+    if (this.highlightEnabled) {
+      this.applyHighlight();
+      this.startAnimation();
+    }
+  }
+
+  ngOnDestroy() {
+    this.clearHighlight();
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
+
+  private applyHighlight() {
+    this.originalBackground = this.el.nativeElement.style.backgroundColor;
+    this.el.nativeElement.style.backgroundColor = this.appHighlight;
+    this.el.nativeElement.style.transition = 'background-color 0.3s ease';
+  }
+
+  private clearHighlight() {
+    if (this.originalBackground) {
+      this.el.nativeElement.style.backgroundColor = this.originalBackground;
+    } else {
+      this.el.nativeElement.style.backgroundColor = '';
+    }
+  }
+
+  private startAnimation() {
+    if (this.highlightDuration > 0) {
+      let blinks = 0;
+      const maxBlinks = this.highlightDuration / 500;
+
+      this.intervalId = setInterval(() => {
+        const current = this.el.nativeElement.style.backgroundColor;
+        this.el.nativeElement.style.backgroundColor =
+          current === this.appHighlight ? 'transparent' : this.appHighlight;
+        blinks++;
+        if (blinks >= maxBlinks) {
+          clearInterval(this.intervalId);
+          this.clearHighlight();
+        }
+      }, 500);
+    }
+  }
+
+  @Input() set highlightColor(color: string) {
+    this.appHighlight = color;
+    if (this.highlightEnabled) {
+      this.el.nativeElement.style.backgroundColor = color;
+    }
+  }
+
+  public highlight() {
+    this.applyHighlight();
+  }
+
+  public unhighlight() {
+    this.clearHighlight();
+  }
+
+  public toggle() {
+    const current = this.el.nativeElement.style.backgroundColor;
+    if (current && current !== 'transparent' && current !== '') {
+      this.unhighlight();
+    } else {
+      this.highlight();
+    }
+  }
+}
+"// === ARCHIVO: src/app/app.routes.ts ===
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [
+  {
+    path: '',
+    redirectTo: 'transactions',
+    pathMatch: 'full'
+  },
+  {
+    path: 'transactions',
+    loadComponent: () =>
+      import('./features/transaction-list/transaction-list.component').then(
+        m => m.TransactionListComponent
+      ),
+    title: 'Transacciones - Fintech'
+  },
+  {
+    path: 'transactions/:id',
+    loadComponent: () =>
+      import('./features/transaction-detail/transaction-detail.component').then(
+        m => m.TransactionDetailComponent
+      ),
+    title: 'Detalle de Transacción - Fintech'
+  },
+  {
+    path: '**',
+    redirectTo: 'transactions'
+  }
+];
